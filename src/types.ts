@@ -732,6 +732,11 @@ export interface InnerHtmlCommand extends BaseCommand {
   selector: string;
 }
 
+export interface XPathCommand extends BaseCommand {
+  action: 'xpath';
+  selector: string;
+}
+
 // Input value
 export interface InputValueCommand extends BaseCommand {
   action: 'inputvalue';
@@ -984,6 +989,7 @@ export type Command =
   | SelectAllCommand
   | InnerTextCommand
   | InnerHtmlCommand
+  | XPathCommand
   | InputValueCommand
   | SetValueCommand
   | DispatchEventCommand

@@ -64,6 +64,7 @@ const ACTION_CATEGORIES: Record<string, string> = {
   gettext: 'get',
   content: 'get',
   innerhtml: 'get',
+  xpath: 'get',
   innertext: 'get',
   inputvalue: 'get',
   url: 'get',

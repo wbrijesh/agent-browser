@@ -1559,7 +1559,7 @@ fn parse_diff(rest: &[&str], id: &str, flags: &Flags) -> Result<Value, ParseErro
 
 fn parse_get(rest: &[&str], id: &str) -> Result<Value, ParseError> {
     const VALID: &[&str] = &[
-        "text", "html", "value", "attr", "url", "title", "count", "box", "styles",
+        "text", "html", "xpath", "value", "attr", "url", "title", "count", "box", "styles",
     ];
 
     match rest.first().copied() {
@@ -1576,6 +1576,13 @@ fn parse_get(rest: &[&str], id: &str) -> Result<Value, ParseError> {
                 usage: "get html <selector>",
             })?;
             Ok(json!({ "id": id, "action": "innerhtml", "selector": sel }))
+        }
+        Some("xpath") => {
+            let sel = rest.get(1).ok_or_else(|| ParseError::MissingArguments {
+                context: "get xpath".to_string(),
+                usage: "get xpath <selector>",
+            })?;
+            Ok(json!({ "id": id, "action": "xpath", "selector": sel }))
         }
         Some("value") => {
             let sel = rest.get(1).ok_or_else(|| ParseError::MissingArguments {
@@ -1624,7 +1631,7 @@ fn parse_get(rest: &[&str], id: &str) -> Result<Value, ParseError> {
         }),
         None => Err(ParseError::MissingArguments {
             context: "get".to_string(),
-            usage: "get <text|html|value|attr|url|title|count|box|styles> [args...]",
+            usage: "get <text|html|xpath|value|attr|url|title|count|box|styles> [args...]",
         }),
     }
 }

@@ -529,6 +529,52 @@ pub async fn get_element_inner_html(
         .unwrap_or_default())
 }
 
+pub async fn get_element_xpath(
+    client: &CdpClient,
+    session_id: &str,
+    ref_map: &RefMap,
+    selector_or_ref: &str,
+) -> Result<String, String> {
+    let object_id = resolve_element_object_id(client, session_id, ref_map, selector_or_ref).await?;
+
+    let result: EvaluateResult = client
+        .send_command_typed(
+            "Runtime.callFunctionOn",
+            &CallFunctionOnParams {
+                function_declaration: r#"function() {
+                    var parts = [];
+                    var current = this;
+                    while (current && current.nodeType === 1) {
+                        var index = 1;
+                        var sibling = current.previousSibling;
+                        while (sibling) {
+                            if (sibling.nodeType === 1 && sibling.tagName === current.tagName) {
+                                index++;
+                            }
+                            sibling = sibling.previousSibling;
+                        }
+                        parts.unshift(current.tagName.toLowerCase() + '[' + index + ']');
+                        current = current.parentNode;
+                    }
+                    return '/' + parts.join('/');
+                }"#
+                .to_string(),
+                object_id: Some(object_id),
+                arguments: None,
+                return_by_value: Some(true),
+                await_promise: Some(false),
+            },
+            Some(session_id),
+        )
+        .await?;
+
+    Ok(result
+        .result
+        .value
+        .and_then(|v| v.as_str().map(|s| s.to_string()))
+        .unwrap_or_default())
+}
+
 pub async fn get_element_input_value(
     client: &CdpClient,
     session_id: &str,

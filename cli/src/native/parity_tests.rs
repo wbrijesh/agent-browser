@@ -123,6 +123,7 @@ const DOCUMENTED_ACTIONS: &[&str] = &[
     "boundingbox",
     "innertext",
     "innerhtml",
+    "xpath",
     "inputvalue",
     "setvalue",
     "count",
@@ -207,7 +208,7 @@ fn minimal_command(action: &str, id: &str) -> Value {
         "click" | "dblclick" | "fill" | "type" | "press" | "hover" | "scroll" | "select"
         | "check" | "uncheck" | "gettext" | "getattribute" | "isvisible" | "isenabled"
         | "ischecked" | "focus" | "clear" | "selectall" | "scrollintoview" | "dispatch"
-        | "highlight" | "tap" | "boundingbox" | "innertext" | "innerhtml" | "inputvalue"
+        | "highlight" | "tap" | "boundingbox" | "innertext" | "innerhtml" | "xpath" | "inputvalue"
         | "setvalue" | "count" | "find" | "nth" | "getbytext" | "getbylabel"
         | "getbyplaceholder" | "getbyalttext" | "getbytitle" | "getbytestid" => {
             obj.insert("selector".to_string(), json!("body"));

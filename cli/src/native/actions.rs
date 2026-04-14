@@ -644,6 +644,7 @@ pub async fn execute_command(cmd: &Value, state: &mut DaemonState) -> Value {
         "boundingbox" => handle_boundingbox(cmd, state).await,
         "innertext" => handle_innertext(cmd, state).await,
         "innerhtml" => handle_innerhtml(cmd, state).await,
+        "xpath" => handle_xpath(cmd, state).await,
         "inputvalue" => handle_inputvalue(cmd, state).await,
         "setvalue" => handle_setvalue(cmd, state).await,
         "count" => handle_count(cmd, state).await,
@@ -2784,6 +2785,20 @@ async fn handle_innerhtml(cmd: &Value, state: &mut DaemonState) -> Result<Value,
         super::element::get_element_inner_html(&mgr.client, &session_id, &state.ref_map, selector)
             .await?;
     Ok(json!({ "html": html }))
+}
+
+async fn handle_xpath(cmd: &Value, state: &mut DaemonState) -> Result<Value, String> {
+    let mgr = state.browser.as_ref().ok_or("Browser not launched")?;
+    let session_id = mgr.active_session_id()?.to_string();
+    let selector = cmd
+        .get("selector")
+        .and_then(|v| v.as_str())
+        .ok_or("Missing 'selector' parameter")?;
+
+    let xpath =
+        super::element::get_element_xpath(&mgr.client, &session_id, &state.ref_map, selector)
+            .await?;
+    Ok(json!({ "xpath": xpath }))
 }
 
 async fn handle_inputvalue(cmd: &Value, state: &mut DaemonState) -> Result<Value, String> {

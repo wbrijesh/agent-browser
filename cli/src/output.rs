@@ -156,6 +156,11 @@ pub fn print_response_with_opts(resp: &Response, action: Option<&str>, opts: &Ou
             print_with_boundaries(html, origin, opts);
             return;
         }
+        // XPath
+        if let Some(xpath) = data.get("xpath").and_then(|v| v.as_str()) {
+            println!("{}", xpath);
+            return;
+        }
         // Value
         if let Some(value) = data.get("value").and_then(|v| v.as_str()) {
             println!("{}", value);
@@ -1474,6 +1479,7 @@ Global Options:
 Examples:
   agent-browser get text @e1
   agent-browser get html "#content"
+  agent-browser get xpath @e1
   agent-browser get value "#email-input"
   agent-browser get attr "#link" href
   agent-browser get title

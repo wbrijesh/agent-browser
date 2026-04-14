@@ -96,6 +96,7 @@ import type {
   SelectAllCommand,
   InnerTextCommand,
   InnerHtmlCommand,
+  XPathCommand,
   InputValueCommand,
   SetValueCommand,
   DispatchEventCommand,
@@ -501,6 +502,8 @@ async function dispatchAction(command: Command, browser: BrowserManager): Promis
       return await handleInnerText(command, browser);
     case 'innerhtml':
       return await handleInnerHtml(command, browser);
+    case 'xpath':
+      return await handleXPath(command, browser);
     case 'inputvalue':
       return await handleInputValue(command, browser);
     case 'setvalue':
@@ -1051,7 +1054,7 @@ async function handleContent(
 
   let html: string;
   if (command.selector) {
-    html = await page.locator(command.selector).innerHTML();
+    html = await browser.getLocator(command.selector).evaluate((el) => el.outerHTML);
   } else {
     html = await page.content();
   }
@@ -2109,8 +2112,29 @@ async function handleInnerHtml(
   browser: BrowserManager
 ): Promise<Response> {
   const page = browser.getPage();
-  const html = await page.locator(command.selector).innerHTML();
+  const html = await browser.getLocator(command.selector).evaluate((el) => el.outerHTML);
   return successResponse(command.id, { html, origin: page.url() });
+}
+
+async function handleXPath(command: XPathCommand, browser: BrowserManager): Promise<Response> {
+  const xpath = await browser.getLocator(command.selector).evaluate((el: any) => {
+    const parts: string[] = [];
+    let current: any = el;
+    while (current && current.nodeType === 1) {
+      let index = 1;
+      let sibling = current.previousSibling;
+      while (sibling) {
+        if (sibling.nodeType === 1 && sibling.tagName === current.tagName) {
+          index++;
+        }
+        sibling = sibling.previousSibling;
+      }
+      parts.unshift(current.tagName.toLowerCase() + '[' + index + ']');
+      current = current.parentNode;
+    }
+    return '/' + parts.join('/');
+  });
+  return successResponse(command.id, { xpath });
 }
 
 async function handleInputValue(
